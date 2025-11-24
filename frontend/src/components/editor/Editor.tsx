@@ -4,6 +4,8 @@ import { Descendant } from "slate";
 import type { withHistory } from "slate-history";
 import { Slate, Editable, withReact } from "slate-react";
 import { INITIAL_VALUE } from "../../lib/slate/config";
+import Toolbar from './Toolbar'
+
 
 
 export default function Editor() {
@@ -16,6 +18,23 @@ export default function Editor() {
         setValue(newValue);
     }
 
+    const renderLeft = ({attributes, children , leaf} : any) => {
+        let content = children;
+        if(leaf.bold) {
+            content = <strong>{children}</strong>
+        }
+
+        if(leaf.italic) {
+            content = <em>{children}</em>
+        }
+
+        if(leaf.underline) {
+            content = <u>{content}</u>;
+        }
+
+        return <span {...attributes}>{content}</span>
+    }
+
     return (
         <div className="min-h-screen bg-gray-100 py-8">
             <div className="max-w-4xl mx-auto">
@@ -23,7 +42,7 @@ export default function Editor() {
                 {/* Header */}
                 <div className="bg-white rounded-t-lg shadow-sm px-6 py-4 border-b">
                     <h1 className="text-2xl font-semibold text-gray-800">
-                        Untitled Document
+                        Header of the Document
                     </h1>
                 </div>
 
@@ -36,9 +55,11 @@ export default function Editor() {
                         initialValue={INITIAL_VALUE}
                         onValueChange={handleChange}
                     >
+                        <Toolbar />
                         <Editable 
                             className="px-20 py-16 min-h-[600px] focus:outline-none text-base"
                             placeholder="Start typing..."
+                            renderLeaf={renderLeft}
                         />
                     </Slate>
                 </div>
