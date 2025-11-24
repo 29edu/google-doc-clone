@@ -31,7 +31,7 @@ function FormatButton({format, icon}: {format: FormatType, icon:string}) {
             onMouseDown={handleMouseDown}
             className={`
                 px-3 py-1.5 rounded font-semibold transition-colors
-                ${isActive ? 'bg-docs-blue text-white' : 'bg-white text-gray-700 hover:bg-gray-200'}
+                ${isActive ? 'bg-docs-blue text-blue-500' : 'bg-white text-gray-700 hover:bg-gray-200'}
                 `}
         >
             <span className={format === 'italic' ? 'italic' : ''}>
@@ -40,3 +40,4 @@ function FormatButton({format, icon}: {format: FormatType, icon:string}) {
         </button>
     )
 }
+// This is the UI that uses utils and utils contains the logic 

@@ -1,24 +1,76 @@
 import React, {useState, useMemo} from "react";
 import { createEditor } from "slate";
-import { Descendant } from "slate";
-import type { withHistory } from "slate-history";
+import { type Descendant } from "slate";
 import { Slate, Editable, withReact } from "slate-react";
 import { INITIAL_VALUE } from "../../lib/slate/config";
 import Toolbar from './Toolbar'
-
+import { toggleFormat } from "../../lib/slate/utils";
+import { saveDocumemt, loadDocument, loadTitle, loadLastSaved } from "../../lib/storage/storage";
 
 
 export default function Editor() {
     
+    const [title, setTitle] = useState<string>(() => loadTitle());
     const editor = useMemo(() => withReact(createEditor()), []);
 
-    const [value, setValue] = useState<Descendant[]>(INITIAL_VALUE);
+    const [value, setValue] = useState<Descendant[]>( () => {
+        const savedDoc = loadDocument();
+        return savedDoc || INITIAL_VALUE;
+    });
 
-    const handleChange = (newValue: Descendant[]) =>{
-        setValue(newValue);
+    const [lastSaved, setLastSaved] = useState<Date | null> (() => loadLastSaved());
+
+    const handleTitleChange  = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const newTitle = event.target.value;
+        setTitle(newTitle);
+
+        // Save Title immediately
+        saveDocumemt(value, newTitle);
+        setLastSaved(new Date());
     }
 
-    const renderLeft = ({attributes, children , leaf} : any) => {
+
+    // Hnadle Keydown is for sortcut and this function runs everytime a key is pressed while the editor has focus
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+        
+        // event.meta key is for mac and event.ctrykKey is for windows
+        const isModifierKey = event.ctrlKey || event.metaKey;
+        if(!isModifierKey) {
+            return;
+        }
+
+        switch(event.key) {
+            case 'b': {
+                event.preventDefault(); // Stops browser defaults
+                toggleFormat(editor, 'bold');
+                break;
+            }
+
+            case 'i': {
+                event.preventDefault(); 
+                toggleFormat(editor, 'italic');
+                break;
+            }
+
+            case 'u': {
+                event.preventDefault();
+                toggleFormat(editor, 'underline');
+                break;
+            }
+
+        }
+    }
+
+    // Auto save
+    const handleChange = (newValue: Descendant[]) =>{
+        setValue(newValue);
+
+        saveDocumemt(newValue, title);
+
+        setLastSaved(new Date())
+    }
+
+    const renderLeaf = ({attributes, children , leaf} : any) => {
         let content = children;
         if(leaf.bold) {
             content = <strong>{children}</strong>
@@ -41,10 +93,20 @@ export default function Editor() {
 
                 {/* Header */}
                 <div className="bg-white rounded-t-lg shadow-sm px-6 py-4 border-b">
-                    <h1 className="text-2xl font-semibold text-gray-800">
-                        Header of the Document
-                    </h1>
+                    <input 
+                        type="text"
+                        value={title}
+                        onChange={handleTitleChange}
+                        className="text-2xl font-semibold text-gray-800 w-full focus:outline-none border-none bg-transparent"
+                        placeholder="Untitled Document"
+                    />
+
+                    {/* Last saved Indicator */}
+                    <p className="text-sm text-gray-500  mt-1">
+                        Last Saved: {lastSaved?.toLocaleTimeString()}
+                    </p>
                 </div>
+                
 
                 {/* Editor Container */}
                 <div className="bg-white rounded-b-lg shadow-lg">
@@ -59,7 +121,8 @@ export default function Editor() {
                         <Editable 
                             className="px-20 py-16 min-h-[600px] focus:outline-none text-base"
                             placeholder="Start typing..."
-                            renderLeaf={renderLeft}
+                            renderLeaf={renderLeaf}
+                            onKeyDown={handleKeyDown}
                         />
                     </Slate>
                 </div>
@@ -67,3 +130,5 @@ export default function Editor() {
         </div>
     )
 }
+
+// Keydown event
