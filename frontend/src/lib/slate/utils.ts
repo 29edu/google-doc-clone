@@ -13,7 +13,7 @@ export const toggleFormat = (editor: Editor, format: FormatType): void => {
 
     Transforms.setNodes(
         editor, 
-        { [format] : isActive ? null : true},
+        { [format] : isActive ? null : true },
         {
             match: n => Text.isText(n),
             split: true
