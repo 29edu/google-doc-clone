@@ -1,43 +1,41 @@
 import { useSlate } from "slate-react";
-import {toggleFormat, isFormatActive, FormatType} from '../../lib/slate/utils';
+import { toggleFormat, isFormatActive } from "../../lib/slate/utils";
+import type { FormatType } from "../../lib/slate/utils";
 
 export default function Toolbar() {
-    const editor = useSlate();
+  return (
+    <div className="flex items-center gap-1 p-2 border-b border-gray-200 bg-gray-50">
+      {/* Bold buttons */}
+      <FormatButton format="bold" icon="B" />
 
-    return (
-        <div className="flex items-center gap-1 p-2 border-b border-gray-200 bg-gray-50">
-
-            {/* Bold buttons */}
-            <FormatButton format = "bold" icon="B" />
-
-            <FormatButton format="italic" icon="I" />
-            <FormatButton format="underline" icon="U" />
-
-        </div>
-    )
+      <FormatButton format="italic" icon="I" />
+      <FormatButton format="underline" icon="U" />
+    </div>
+  );
 }
 
-function FormatButton({format, icon}: {format: FormatType, icon:string}) {
+function FormatButton({ format, icon }: { format: FormatType; icon: string }) {
+  const editor = useSlate();
+  const isActive = isFormatActive(editor, format);
+  const handleMouseDown = (event: React.MouseEvent) => {
+    event.preventDefault();
+    toggleFormat(editor, format);
+  };
 
-    const editor = useSlate();
-    const isActive = isFormatActive(editor, format);
-    const handleMouseDown = (event: React.MouseEvent) => {
-        event.preventDefault();
-        toggleFormat(editor, format);
-    }
-
-    return (
-        <button
-            onMouseDown={handleMouseDown}
-            className={`
+  return (
+    <button
+      onMouseDown={handleMouseDown}
+      className={`
                 px-3 py-1.5 rounded font-semibold transition-colors
-                ${isActive ? 'bg-docs-blue text-blue-500' : 'bg-white text-gray-700 hover:bg-gray-200'}
+                ${
+                  isActive
+                    ? "bg-docs-blue text-blue-500"
+                    : "bg-white text-gray-700 hover:bg-gray-200"
+                }
                 `}
-        >
-            <span className={format === 'italic' ? 'italic' : ''}>
-                {icon}
-            </span>
-        </button>
-    )
+    >
+      <span className={format === "italic" ? "italic" : ""}>{icon}</span>
+    </button>
+  );
 }
-// This is the UI that uses utils and utils contains the logic 
+// This is the UI that uses utils and utils contains the logic
